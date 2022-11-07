@@ -1,6 +1,9 @@
 #Region Based analysis
 import numpy as np
 import cv2 as cv
+from SAD import *
+from SSD import *
+from NCC import *
 #left- left image
 #right- right image
 #method- either SAD, SSD, NCC
@@ -23,9 +26,9 @@ def regionBased(left,right,method,searchRange,templateW,templateH):
 #searches for the template in the given image
 def getDisp(template, image, method, searchRange, x,y):
     if method=="SAD":
-        #use SAD
-    else if method=="SSD":
-        #use SSD
+        return SADDisp(template,image,searchRange,x,y)
+    elif method=="SSD":
+        return SSDDisp(template,image,searchRange,x,y)
     else:
-        #use NCC
+        return NCCDisp(template,image,searchRange,x,y)
 

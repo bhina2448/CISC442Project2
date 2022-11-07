@@ -12,8 +12,9 @@ from NCC import *
 #templateH- height of the template
 def regionBased(left,right,method,searchRange,templateW,templateH):
     depth =np.zeros(left.shape, dtype=np.float32)
-    width= (int)(left.width / templateW)*templateW
-    height=(int)(left.height/templateH)*templateH
+    row,col=left.shape
+    width= (int)(row / templateW)*templateW
+    height=(int)(col/templateH)*templateH
     for x in range(0,(width-templateW-1)):
         for y in range(0,(height-templateH-1)):
             curr=left[x:x+templateW, y:y+templateH]

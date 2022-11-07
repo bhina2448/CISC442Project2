@@ -1,4 +1,4 @@
-#Region Based analysis, Sum of Absolute Differences
+#Sum of Absolute Differences
 import numpy as np
 
 #Gets the disparity using SAD

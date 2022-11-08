@@ -26,7 +26,7 @@ def NCCDisp(template, image, searchRange, xpos,ypos):
 
 #computes NCC for arrays template and section (must be of same size)
 def NCC(template, section):
-    row,col,dim= template.shape
+    row,col= template.shape
     mult=0
     I1=0
     I2=0

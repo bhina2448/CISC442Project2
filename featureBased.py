@@ -16,47 +16,43 @@ def featureBased(left,right,method,searchRange,templateW,templateH):
     row,col=left.shape
     width= (int)(row / templateW)*templateW
     height=(int)(col/templateH)*templateH
-    cornersLeft= cv.goodFeaturesToTrack(left,100,0.1,10)
-    cornersRight= cv.goodFeaturesToTrack(right,100,0.1,10)
+    cornersLeft= cv.goodFeaturesToTrack(left,5000,0.01,1)
     for corner in cornersLeft:
         x,y=corner.ravel()
-        xstart=int(x-int(templateW/2))
-        xend=int(x+int(templateW/2))
-        ystart=int(y-int(templateH/2))
-        yend=int(y+int(templateH/2))
-        if xstart<0:
-            n=abs(xstart)
-            xend=xend+n
-            xstart=0
-        if xend> width-int(templateW/2)-1:
-            val=xend -(width-int(templateW/2)-1)
-            xstart=xstart-val
-            xend=width-int(templateW/2)-1
-        if ystart<0:
-            n=abs(ystart)
-            yend=yend+n
-            ystart=0
-        if yend> height-int(templateH/2)-1:
-            val=yend -(height-int(templateH/2)-1)
-            ystart=ystart-val
-            yend=height-int(templateH/2)-1
-        curr=left[xstart:xend, ystart:yend]
-        disparity=getDisp(method,curr,y,x,cornersRight,right,templateW,templateH,searchRange)
-        #update depth map values
-        for i in range(xstart,xend):
-            for j in range(ystart,yend):
-                depth[i,j]=disparity
-
+        xstart=int(x)
+        xend=int(x+templateW)
+        ystart=int(y)
+        yend=int(y+templateH)
+        if (xend<row)& (yend<col):
+            curr=left[xstart:xend, ystart:yend]
+            disparity=getDisp(curr,right,method,searchRange,xstart,ystart)
+            #update depth map values
+            depth[xstart,ystart]=disparity
+    #depth=avgNeighborhood(depth,templateW,templateH,height,width)
     depth=cv.normalize(depth,None, alpha=0,beta=255,norm_type=cv.NORM_MINMAX,dtype=cv.CV_8U)
     return depth
 
 #returns the dispartiry using the given method
 #searches for the template in the given image
-def getDisp(method,template, templateypos,templatexpos,rightCorners, rightImg,templateW,templateH,searchRange):
+def getDisp(template, image, method, searchRange, x,y):
     if method=="SAD":
-        return SADDispCorner(template,templateypos,templatexpos,rightCorners,rightImg,templateW,templateH,searchRange)
+        return SADDisp(template,image,searchRange,x,y)
     elif method=="SSD":
-        return SSDDispCorner(template,templateypos,templatexpos,rightCorners,rightImg,templateW,templateH,searchRange)
+        return SSDDisp(template,image,searchRange,x,y)
     else:
-        return NCCDispCorner(template,templateypos,templatexpos,rightCorners,rightImg,templateW,templateH,searchRange)
+        return NCCDisp(template,image,searchRange,x,y)
+
+def avgNeighborhood(depth, templateW,templateH,height, width):
+    x=0
+    y=0
+    while(x<width-templateW-1):
+        while(y< height-templateH-1):
+            curr=depth[x:x+templateW, y:y+templateH]
+            avg=np.average(curr)
+            for i in range(x, x+templateW):
+                for j in range(y,y+templateH):
+                    depth[i,j]=avg
+            y=y+templateH
+        x=x+templateW
+    return depth
 

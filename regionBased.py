@@ -15,8 +15,8 @@ def regionBased(left,right,method,searchRange,templateW,templateH):
     row,col=left.shape
     width= (int)(row / templateW)*templateW
     height=(int)(col/templateH)*templateH
-    for x in range(0,(width-templateW-1)):
-        for y in range(0,(height-templateH-1)):
+    for x in range(0,(width-1)):
+        for y in range(0,(height-1)):
             curr=left[x:x+templateW, y:y+templateH]
             disparity=getDisp(curr,right,method,searchRange,x,y)
             depth[x,y]=disparity

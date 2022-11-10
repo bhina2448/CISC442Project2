@@ -19,7 +19,11 @@ def SSDDisp(template, image, searchRange, xpos,ypos):
     for x in range(minx,maxx):
         curr=image[x:x+trow,ypos:ypos+tcol]
         val=SSD(template,curr)
-        if(val<ssdVal):
+        if(val==ssdVal):
+            d=abs(xpos-x)
+            if(d<disp):
+                disp=d
+        elif(val<ssdVal):
             ssdVal=val
             disp=abs(xpos-x)
     return disp

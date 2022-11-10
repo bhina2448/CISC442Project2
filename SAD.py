@@ -19,7 +19,11 @@ def SADDisp(template, image, searchRange, xpos,ypos):
     for x in range(minx,maxx):
         curr=image[x:x+trow,ypos:ypos+tcol]
         val=SAD(template,curr)
-        if(val<sadval):
+        if(val==sadval):
+            d=abs(xpos-x)
+            if(d<disp):
+                disp=d
+        elif(val<sadval):
             sadval=val
             disp=abs(xpos-x)
     return disp

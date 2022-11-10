@@ -23,6 +23,46 @@ def NCCDisp(template, image, searchRange, xpos,ypos):
             disp=val
     return disp
 
+#gets the disparity using corner detection and NCC 
+#template is the section of the left image to search for
+#templateypos and templatexpos is the x,y position of the template in the original right image
+#right corners is all of the corners detected in the right image
+#rightImg is the original right image
+#templateW and templateH is the height and weight of the template
+#searchRange is the max range that will be searched
+def NCCDispCorner(template, templateypos,templatexpos,rightCorners, rightImg,templateW,templateH,searchRange):
+    row,col=rightImg.shape
+    width= (int)(row / templateW)*templateW
+    height=(int)(col/templateH)*templateH
+    disp=255
+    for corner in rightCorners:
+        x,y=corner.ravel()
+        if(y==templateypos)& (x<=templatexpos+searchRange):
+            xstart=int(x-int(templateW/2))
+            xend=int(x+int(templateW/2))
+            ystart=int(y-int(templateH/2))
+            yend=int(y+int(templateH/2))
+            if xstart<0:
+                n=abs(xstart)
+                xend=xend+n
+                xstart=0
+            if xend> width-int(templateW/2)-1:
+                val=xend -(width-int(templateW/2)-1)
+                xstart=xstart-val
+                xend=width-int(templateW/2)-1
+            if ystart<0:
+                n=abs(ystart)
+                yend=yend+n
+                ystart=0
+            if yend> height-int(templateH/2)-1:
+                val=yend -(height-int(templateH/2)-1)
+                ystart=ystart-val
+                yend=height-int(templateH/2)-1
+            curr=rightImg[xstart:xend, ystart:yend]
+            val=NCC(template,curr)
+            if(val<disp):
+                disp=val
+    return disp
 
 #computes NCC for arrays template and section (must be of same size)
 def NCC(template, section):

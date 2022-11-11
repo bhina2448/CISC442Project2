@@ -4,49 +4,35 @@ import cv2 as cv
 from SAD import *
 from SSD import *
 from NCC import *
-#left- left image
-#right- right image
-#method- either SAD, SSD, NCC
-#searchRange- size of searching area
-#templateW- width of the template
-#templateH- height of the template
-def regionBased(left,right,method,searchRange,templateW,templateH):
-    depth =np.zeros(left.shape, dtype=np.float32)
-    row,col=left.shape
-    width= int(row-(templateW-1))
-    height=int(col-(templateH-1))
-    for x in range(0,width):
-        for y in range(0,height):
-            curr=left[x:x+templateW, y:y+templateH]
-            xpos=x+int(templateW/2)
-            ypos=y+int(templateH/2)
-            disparity=getDisp(curr,right,method,searchRange,xpos,ypos)
-            depth[xpos,ypos]=disparity
-    #depth=avgNeighborhood(depth,templateW,templateH,height,width)
-    depth=cv.normalize(depth,None, alpha=0,beta=255,norm_type=cv.NORM_MINMAX,dtype=cv.CV_8U)
-    return depth
 
-#returns the dispartiry using the given method
-#searches for the template in the given image
-def getDisp(template, image, method, searchRange, x,y):
-    if method=="SAD":
-        return SADDisp(template,image,searchRange,x,y)
+#left, right are the images
+#method is either SAD, SSD, NCC
+#searchRange is th emax distanct to search
+#templateW and templateH is the width and heights of the template
+def blockmatch(left,right,method,searchRange,templateW,templateH):
+    dispmap=np.zeros(left.shape,dtype=np.float32)
+    width,height=left.shape
+    for y in range (0,height-1-int(templateH/2)):
+        for x in range (0,width-1-int(templateW/2)):
+            ghat=-1
+            dhat=0
+            for d in range(1,searchRange):
+                g=0
+                for j in range((1-int(templateH/2)),(1+int(templateH/2))):
+                    for i in range((1-int(templateW/2)),(1+int(templateW/2))):
+                        g=g+dissim(left[x+i,y+j],right[x+i-d,y+j],method)
+                if g< ghat or ghat<0:
+                    ghat=g
+                    dhat=d
+            dispmap[x,y]=dhat
+    dispmap=cv.normalize(dispmap,None, alpha=0,beta=255,norm_type=cv.NORM_MINMAX,dtype=cv.CV_8U)
+    return dispmap
+def dissim(A,B,method):
+    if method== "SAD":
+        return abs(int(A)-int(B))
     elif method=="SSD":
-        return SSDDisp(template,image,searchRange,x,y)
+        return (int(A)-int(B))**2
     else:
-        return NCCDisp(template,image,searchRange,x,y)
-
-def avgNeighborhood(depth, templateW,templateH,height, width):
-    x=0
-    y=0
-    while(x<width-templateW-1):
-        while(y< height-templateH-1):
-            curr=depth[x:x+templateW, y:y+templateH]
-            avg=np.average(curr)
-            for i in range(x, x+templateW):
-                for j in range(y,y+templateH):
-                    depth[i,j]=avg
-            y=y+templateH
-        x=x+templateW
-    return depth
-
+        num=float(A)*float(B)
+        den=(float(A)**2)* (float(B)**2)
+        return num/ math.sqrt(den)

@@ -8,8 +8,6 @@ import math
 def NCCDisp(template, image, searchRange, xpos,ypos):
     trow,tcol= template.shape
     irow,icol=image.shape
-    curr=image[xpos:xpos+trow, ypos:ypos+tcol]
-    nccVal=NCC(template,curr)
     disp=0
     minx=xpos-searchRange
     maxx=xpos+searchRange
@@ -17,16 +15,18 @@ def NCCDisp(template, image, searchRange, xpos,ypos):
         minx=0
     if(maxx>= irow-trow):
         maxx= irow-trow -1
+    curr=image[minx:minx+trow, ypos-int(tcol/2):ypos+int(tcol/2)+1]
+    nccVal=NCC(template,curr)
     for x in range(minx,maxx):
-        curr=image[x:x+trow,ypos:ypos+tcol]
+        curr=image[x:x+trow,ypos-int(tcol/2):ypos+int(tcol/2)+1]
         val=NCC(template,curr)
         if(val==nccVal):
-            d=abs(xpos-x)
+            d=abs(xpos-(x+int(trow/2)))
             if(d<disp):
                 disp=d
         elif(val<nccVal):
             nccVal=val
-            disp=abs(xpos-x)
+            disp=abs(xpos-(x+int(trow/2)))
     return disp
 
 

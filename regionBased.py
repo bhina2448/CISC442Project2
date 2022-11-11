@@ -13,14 +13,16 @@ from NCC import *
 def regionBased(left,right,method,searchRange,templateW,templateH):
     depth =np.zeros(left.shape, dtype=np.float32)
     row,col=left.shape
-    width= (int)(row / templateW)*templateW
-    height=(int)(col/templateH)*templateH
-    for x in range(0,(width-1)):
-        for y in range(0,(height-1)):
+    width= int(row-(templateW-1))
+    height=int(col-(templateH-1))
+    for x in range(0,width):
+        for y in range(0,height):
             curr=left[x:x+templateW, y:y+templateH]
-            disparity=getDisp(curr,right,method,searchRange,x,y)
-            depth[x,y]=disparity
-    depth=avgNeighborhood(depth,templateW,templateH,height,width)
+            xpos=x+int(templateW/2)
+            ypos=y+int(templateH/2)
+            disparity=getDisp(curr,right,method,searchRange,xpos,ypos)
+            depth[xpos,ypos]=disparity
+    #depth=avgNeighborhood(depth,templateW,templateH,height,width)
     depth=cv.normalize(depth,None, alpha=0,beta=255,norm_type=cv.NORM_MINMAX,dtype=cv.CV_8U)
     return depth
 

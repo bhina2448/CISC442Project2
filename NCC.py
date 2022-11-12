@@ -42,4 +42,4 @@ def NCC(template, section):
             I1=I1+int((template[x,y])**2)
             I2=I2+int((section[x,y])**2)
     ncc=mult/ math.sqrt(I1*I2)
-    return ncc
+    return 1-ncc

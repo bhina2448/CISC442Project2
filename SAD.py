@@ -5,9 +5,9 @@ import cv2 as cv
 #Gets the disparity using SAD
 #searching for template in image
 #xpos,ypos is templates position in original left side image
-def SADDisp(template, right,left, searchRange, xpos,ypos):
+def SADDisp(template, image, searchRange, xpos,ypos):
     trow,tcol= template.shape
-    irow,icol=right.shape
+    irow,icol=image.shape
     disp=0
     minx=xpos-searchRange
     maxx=xpos+searchRange
@@ -15,21 +15,20 @@ def SADDisp(template, right,left, searchRange, xpos,ypos):
         minx=0
     if(maxx>= irow-trow):
         maxx= irow-trow -1
-    #curr=image[minx:minx+trow, ypos-int(tcol/2):ypos+int(tcol/2)+1]
-    #sadval=SAD(template,curr)
-    sadval=255
+    curr=image[minx:minx+trow, ypos-int(tcol/2):ypos+int(tcol/2)+1]
+    ssdVal=SAD(template,curr)
     for x in range(minx,maxx):
-        curr=right[x:x+trow,ypos-int(tcol/2):ypos+int(tcol/2)+1]
-        d=abs(xpos-(x+int(trow/2)))
+        curr=image[x:x+trow,ypos-int(tcol/2):ypos+int(tcol/2)+1]
         val=SAD(template,curr)
-        #val=SAD(left,right,x,x+trow,ypos-int(tcol/2),ypos+int(tcol/2)+1,d)
-        if(val==sadval):
+        if(val==ssdVal):
+            d=abs(xpos-(x+int(trow/2)))
             if(d<disp):
                 disp=d
-        elif(val<sadval):
-            sadval=val
-            disp=d
+        elif(val<ssdVal):
+            ssdVal=val
+            disp=abs(xpos-(x+int(trow/2)))
     return disp
+
 
 def SADold(left,right,startx,endx,starty,endy,d):
     sum=0
